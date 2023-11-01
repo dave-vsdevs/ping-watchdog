@@ -86,6 +86,7 @@ class MyLog:
         logger.addHandler(ch)
         logger.setLevel(logging.DEBUG)
 
+
         # setup file logging
         fh = logging.FileHandler(self.log_file, mode='a')
         fh.setLevel(logging.FATAL)
@@ -99,7 +100,7 @@ class MyLog:
         '''
         if int(self.log_max_size) > 0:
             fsize = os.path.getsize(self.log_file)
-            if fsize > self.log_max_size:
+            if fsize > int(self.log_max_size):
                 logger.debug('log file too large. trucating log file')
                 with open(self.log_file, 'w') as f:
                     pass
@@ -339,10 +340,9 @@ def main():
     # setup log file
     log_file = ''  # leave empty for default value
     log_max_size = 2 * 1024 * 1024  # empty log file if larger than 2MB
-    log = MyLog(log_max_size, log_file)
 
     # setup config file
-    config_file = ''  # leave empty for default value
+    config_file = ''
     config_items = {
         "ping": {
             "host": "127.0.0.1",
@@ -361,12 +361,14 @@ def main():
             "pushover_api_token": ""
         },
         "log": {
-            "log_file": log.log_file,
-            "log_max_size": log.log_max_size
+            "log_file": log_file,
+            "log_max_size": log_max_size
         }
     }
 
     config = MyConfig(config_items, config_file)
+
+    log = MyLog(config.config['log']['log_max_size'], config.config['log']['log_file'])
 
     if ping_host(config):
         logger.fatal("no reboot required")
